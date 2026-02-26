@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="SessionClock">
+<meta name="theme-color" id="theme-color-meta" content="#1a1a1a">
+<title>Market Session Clock</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:        #f5f5f0;
+    --surface:   #ffffff;
+    --border:    #e8e8e3;
+    --border-em: #1a1a1a;
+    --text:      #1a1a1a;
+    --text-sub:  #6b7280;
+    --text-dim:  #9ca3af;
+    --active-bg: #1a1a1a;
+    --active-fg: #ffffff;
+    --active-sub:rgba(255,255,255,0.45);
+    --prog-bg:   #f3f4f6;
+    --prog-fill: #1a1a1a;
+    --closed-bg: #f3f4f6;
+    --closed-fg: #9ca3af;
+  }
+
+  [data-theme="dark"] {
+    --bg:        #0f0f0f;
+    --surface:   #1c1c1e;
+    --border:    #2c2c2e;
+    --border-em: #ffffff;
+    --text:      #f2f2f7;
+    --text-sub:  #8e8e93;
+    --text-dim:  #636366;
+    --active-bg: #ffffff;
+    --active-fg: #1a1a1a;
+    --active-sub:rgba(0,0,0,0.45);
+    --prog-bg:   #2c2c2e;
+    --prog-fill: #ffffff;
+    --closed-bg: #2c2c2e;
+    --closed-fg: #636366;
+  }
+
+  html, body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    min-height: 100dvh;
+    transition: background 0.3s, color 0.3s;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    transition: background 0.3s, border-color 0.3s;
+  }
+
+  .label { color: var(--text-sub); }
+  .dim   { color: var(--text-dim); }
+
+  /* Session rows */
+  .session-row {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    transition: all 0.3s;
+  }
+  .session-row.is-active {
+    background: var(--active-bg);
+    border-color: var(--active-bg);
+    color: var(--active-fg);
+  }
+  .session-row.is-next {
+    background: var(--surface);
+    border: 1.5px solid var(--border-em);
+  }
+  .session-row.is-next .row-name { color: var(--text); }
+
+  /* Dots */
+  .dot-idle   { background: var(--text-dim); }
+  .dot-active { background: #22c55e; animation: pulse-green 2s ease-in-out infinite; }
+  .dot-next   { background: #f59e0b; }
+
+  @keyframes pulse-green {
+    0%, 100% { box-shadow: 0 0 0 3px rgba(34,197,94,0.25); }
+    50%       { box-shadow: 0 0 0 6px rgba(34,197,94,0.1); }
+  }
+
+  /* Toggle switch */
+  .toggle-track {
+    width: 44px; height: 26px;
+    background: var(--border);
+    border-radius: 13px;
+    position: relative;
+    cursor: pointer;
+    transition: background 0.3s;
+    flex-shrink: 0;
+  }
+  .toggle-track.on { background: #1a1a1a; }
+  [data-theme="dark"] .toggle-track.on { background: #f2f2f7; }
+  .toggle-thumb {
+    width: 20px; height: 20px;
+    background: #fff;
+    border-radius: 50%;
+    position: absolute;
+    top: 3px; left: 3px;
+    transition: transform 0.3s, background 0.3s;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  }
+  .toggle-track.on .toggle-thumb {
+    transform: translateX(18px);
+  }
+  [data-theme="dark"] .toggle-track.on .toggle-thumb { background: #1a1a1a; }
+
+  /* Progress bar track */
+  .prog-track {
+    background: var(--prog-bg);
+    transition: background 0.3s;
+  }
+  #progress-bar {
+    background: var(--prog-fill);
+    transition: width 1s linear, background 0.3s;
+  }
+</style>
+</head>
+<body>
+
+<div class="max-w-md mx-auto px-4 pt-8 pb-12">
+
+  <!-- Header -->
+  <div class="flex items-center justify-between mb-6">
+    <div>
+      <p class="text-xs font-semibold tracking-widest dim uppercase mb-0.5">ICT Sessions</p>
+      <h1 class="text-2xl font-bold" style="color:var(--text)">Market Clock</h1>
+    </div>
+    <div class="flex items-center gap-3">
+      <div class="text-right">
+        <p class="text-xs dim mb-0.5">Karachi</p>
+        <p class="text-sm font-semibold label" id="khi-time">--:-- --</p>
+      </div>
+      <!-- Dark mode toggle -->
+      <div>
+        <p class="text-xs dim mb-1 text-center">
+          <span id="theme-icon">☀️</span>
+        </p>
+        <div class="toggle-track" id="toggle" onclick="toggleTheme()">
+          <div class="toggle-thumb"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- NY Clock -->
+  <div class="card rounded-2xl px-5 py-4 mb-4 shadow-sm">
+    <p class="text-xs font-semibold tracking-widest dim uppercase mb-1">New York Time</p>
+    <p class="text-5xl font-bold tracking-tight leading-none" style="color:var(--text)" id="ny-time">--:-- --</p>
+    <p class="text-sm dim mt-1.5" id="ny-date">---</p>
+  </div>
+
+  <!-- Current Session -->
+  <div class="card rounded-2xl px-5 py-4 mb-3 shadow-sm">
+    <div class="flex items-center justify-between mb-3">
+      <div class="flex items-center gap-2">
+        <div class="w-2 h-2 rounded-full dot-active"></div>
+        <p class="text-xs font-semibold tracking-widest dim uppercase">Now</p>
+      </div>
+      <span class="text-xs font-bold px-2.5 py-1 rounded-full" id="current-pill">ACTIVE</span>
+    </div>
+    <p class="text-xl font-bold mb-0.5" style="color:var(--text)" id="current-name">—</p>
+    <p class="text-sm dim mb-4" id="current-range">—</p>
+    <div class="h-1.5 prog-track rounded-full overflow-hidden">
+      <div id="progress-bar" class="h-full rounded-full" style="width:0%"></div>
+    </div>
+    <div class="flex justify-between mt-1.5">
+      <span class="text-xs dim" id="prog-start">—</span>
+      <span class="text-xs font-medium label" id="prog-pct">—</span>
+      <span class="text-xs dim" id="prog-end">—</span>
+    </div>
+  </div>
+
+  <!-- Next Session -->
+  <div class="card rounded-2xl px-5 py-4 mb-7 shadow-sm">
+    <div class="flex items-center justify-between mb-2">
+      <div class="flex items-center gap-2">
+        <div class="w-2 h-2 rounded-full dot-next"></div>
+        <p class="text-xs font-semibold tracking-widest dim uppercase">Up Next</p>
+      </div>
+      <div class="text-right">
+        <p class="text-xs dim mb-0.5">starts in</p>
+        <p class="text-sm font-bold tabular-nums text-amber-500" id="next-countdown">--:--</p>
+      </div>
+    </div>
+    <p class="text-lg font-bold mb-0.5" style="color:var(--text)" id="next-name">—</p>
+    <p class="text-sm dim" id="next-range">—</p>
+  </div>
+
+  <!-- All Sessions -->
+  <p class="text-xs font-semibold tracking-widest dim uppercase mb-3">All Sessions · NY Time</p>
+  <div class="flex flex-col gap-2" id="sessions-list"></div>
+
+</div>
+
+<script>
+// ── Theme ──────────────────────────────────────────────────────────────
+const saved = localStorage.getItem('theme') || 'light';
+applyTheme(saved);
+
+function applyTheme(t) {
+  document.documentElement.setAttribute('data-theme', t);
+  const tog = document.getElementById('toggle');
+  const icon = document.getElementById('theme-icon');
+  const meta = document.getElementById('theme-color-meta');
+  if (t === 'dark') {
+    tog.classList.add('on');
+    icon.textContent = '🌙';
+    meta.content = '#0f0f0f';
+  } else {
+    tog.classList.remove('on');
+    icon.textContent = '☀️';
+    meta.content = '#f5f5f0';
+  }
+}
+
+function toggleTheme() {
+  const curr = document.documentElement.getAttribute('data-theme');
+  const next = curr === 'dark' ? 'light' : 'dark';
+  localStorage.setItem('theme', next);
+  applyTheme(next);
+}
+
+// ── Sessions ──────────────────────────────────────────────────────────
+const SESSIONS = [
+  { id: 'london_midnight', name: 'London Midnight',       start: '00:00', end: '02:00' },
+  { id: 'london_kz',       name: 'London Kill Zone',      start: '02:00', end: '05:00' },
+  { id: 'london_lunch',    name: 'London Lunch',          start: '05:00', end: '07:00' },
+  { id: 'ny_kz',           name: 'New York Kill Zone',    start: '07:00', end: '10:00' },
+  { id: 'cme_open',        name: 'CME Open',              start: '08:20', end: '10:00' },
+  { id: 'london_close_kz', name: 'London Close KZ',       start: '10:00', end: '12:00' },
+  { id: 'central_bank',    name: 'Central Bank Range',    start: '14:00', end: '20:00' },
+  { id: 'asian_session',   name: 'Asian Range',           start: '20:00', end: '22:00' },
+];
+
+function toMins(hhmm) {
+  const [h, m] = hhmm.split(':').map(Number);
+  return h * 60 + m;
+}
+function fmt12(hhmm) {
+  const [h, m] = hhmm.split(':').map(Number);
+  const ampm = h < 12 ? 'AM' : 'PM';
+  const h12 = h % 12 === 0 ? 12 : h % 12;
+  return `${h12}:${String(m).padStart(2,'0')} ${ampm}`;
+}
+function getNYMinutes(date) {
+  const s = date.toLocaleString('en-US', { timeZone: 'America/New_York', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+  const time = s.split(', ').pop();
+  const [h, m, sec] = time.split(':').map(Number);
+  return h * 60 + m + sec / 60;
+}
+function fmtClock(date, tz) {
+  return date.toLocaleTimeString('en-US', { timeZone: tz, hour: 'numeric', minute: '2-digit', second: '2-digit', hour12: true });
+}
+function fmtDate(date, tz) {
+  return date.toLocaleDateString('en-US', { timeZone: tz, weekday: 'long', month: 'short', day: 'numeric' });
+}
+function fmtCountdown(mins) {
+  const h = Math.floor(Math.abs(mins) / 60);
+  const m = Math.floor(Math.abs(mins) % 60);
+  return h > 0 ? `${h}h ${String(m).padStart(2,'0')}m` : `${m}m`;
+}
+function getStatus(nyMins) {
+  let active = null, next = null, minGap = Infinity;
+  for (const s of SESSIONS) {
+    const st = toMins(s.start), en = toMins(s.end);
+    if (nyMins >= st && nyMins < en)
+      active = { session: s, elapsed: nyMins - st, total: en - st, left: en - nyMins };
+    let gap = st - nyMins;
+    if (gap <= 0) gap += 1440;
+    if (gap < minGap) { minGap = gap; next = { session: s, inMins: gap }; }
+  }
+  return { active, next };
+}
+
+// Build list
+const list = document.getElementById('sessions-list');
+SESSIONS.forEach(s => {
+  const el = document.createElement('div');
+  el.id = 'row-' + s.id;
+  el.className = 'session-row rounded-xl px-4 py-3 flex items-center justify-between';
+  el.innerHTML = `
+    <div class="flex items-center gap-3">
+      <div class="w-2 h-2 rounded-full dot-idle transition-all duration-300" id="dot-${s.id}"></div>
+      <span class="text-sm font-semibold row-name transition-colors duration-300" id="name-${s.id}" style="color:var(--text)">${s.name}</span>
+    </div>
+    <span class="text-xs tabular-nums dim" id="range-${s.id}">${fmt12(s.start)} – ${fmt12(s.end)}</span>
+  `;
+  list.appendChild(el);
+});
+
+function update() {
+  const now = new Date();
+  document.getElementById('ny-time').textContent = fmtClock(now, 'America/New_York');
+  document.getElementById('ny-date').textContent = fmtDate(now, 'America/New_York');
+  document.getElementById('khi-time').textContent = fmtClock(now, 'Asia/Karachi');
+
+  const nyMins = getNYMinutes(now);
+  const { active, next } = getStatus(nyMins);
+
+  // Reset rows
+  SESSIONS.forEach(s => {
+    document.getElementById('row-' + s.id).className = 'session-row rounded-xl px-4 py-3 flex items-center justify-between';
+    document.getElementById('dot-' + s.id).className = 'w-2 h-2 rounded-full dot-idle transition-all duration-300';
+    document.getElementById('name-' + s.id).style.color = 'var(--text)';
+    document.getElementById('range-' + s.id).style.color = '';
+  });
+
+  // Current
+  if (active) {
+    const s = active.session;
+    document.getElementById('current-name').textContent = s.name;
+    document.getElementById('current-range').textContent = `${fmt12(s.start)} – ${fmt12(s.end)} NY`;
+    document.getElementById('current-pill').textContent = 'ACTIVE';
+    document.getElementById('current-pill').style.cssText = 'background:#f0fdf4;color:#16a34a';
+
+    const pct = Math.round((active.elapsed / active.total) * 100);
+    document.getElementById('progress-bar').style.width = pct + '%';
+    document.getElementById('prog-start').textContent = fmt12(s.start);
+    document.getElementById('prog-pct').textContent = `${pct}% · ${fmtCountdown(active.left)} left`;
+    document.getElementById('prog-end').textContent = fmt12(s.end);
+
+    document.getElementById('row-' + s.id).className = 'session-row is-active rounded-xl px-4 py-3 flex items-center justify-between';
+    document.getElementById('dot-' + s.id).className = 'w-2 h-2 rounded-full dot-active transition-all duration-300';
+    document.getElementById('name-' + s.id).style.color = 'var(--active-fg)';
+    document.getElementById('range-' + s.id).style.color = 'var(--active-sub)';
+  } else {
+    document.getElementById('current-name').textContent = 'Between sessions';
+    document.getElementById('current-range').textContent = 'No session currently active';
+    document.getElementById('current-pill').textContent = 'CLOSED';
+    document.getElementById('current-pill').style.cssText = 'background:var(--closed-bg);color:var(--closed-fg)';
+    document.getElementById('progress-bar').style.width = '0%';
+    document.getElementById('prog-start').textContent = '—';
+    document.getElementById('prog-pct').textContent = 'Waiting';
+    document.getElementById('prog-end').textContent = '—';
+  }
+
+  // Next
+  if (next) {
+    const s = next.session;
+    document.getElementById('next-name').textContent = s.name;
+    document.getElementById('next-range').textContent = `${fmt12(s.start)} – ${fmt12(s.end)} NY`;
+    document.getElementById('next-countdown').textContent = fmtCountdown(next.inMins);
+    if (!active || active.session.id !== s.id) {
+      document.getElementById('row-' + s.id).className = 'session-row is-next rounded-xl px-4 py-3 flex items-center justify-between';
+      document.getElementById('dot-' + s.id).className = 'w-2 h-2 rounded-full dot-next transition-all duration-300';
+    }
+  }
+}
+
+update();
+setInterval(update, 1000);
+
+// ── Service Worker ────────────────────────────────────────────────────
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').then(reg => {
+      console.log('SW registered', reg.scope);
+    }).catch(err => console.log('SW failed', err));
+  });
+}
+</script>
+</body>
+</html>
