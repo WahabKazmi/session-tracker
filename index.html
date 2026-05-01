@@ -1,279 +1,239 @@
 
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Inter',sans-serif;background:var(--color-background-tertiary);color:var(--color-text-primary);min-height:100vh}
-.card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:1rem 1.25rem}
-.lbl{color:var(--color-text-tertiary);font-size:11px;font-weight:500;letter-spacing:.07em;text-transform:uppercase}
-.dim{color:var(--color-text-tertiary)}
-.session-row{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:10px 14px;display:flex;align-items:center;justify-content:space-between;transition:all .3s}
-.session-row.is-active{background:var(--color-text-primary);border-color:var(--color-text-primary)}
-.session-row.is-active .row-name{color:var(--color-background-primary)!important}
-.session-row.is-active .row-range{color:rgba(255,255,255,.4)!important}
-.session-row.is-next{border:1px solid var(--color-border-primary)}
-.child-row{border-radius:6px;padding:8px 12px;display:flex;align-items:center;justify-content:space-between;transition:all .3s;border:0.5px solid var(--color-border-tertiary);background:var(--color-background-secondary)}
-.child-row.is-active{background:#fef3c7;border-color:#f59e0b}
-.child-row.is-active .child-name{color:#92400e!important}
-.child-row.is-active .child-range{color:#b45309!important}
-.dot{width:7px;height:7px;border-radius:50%;background:var(--color-border-secondary);flex-shrink:0;transition:all .3s}
-.dot.active{background:#22c55e;box-shadow:0 0 0 3px rgba(34,197,94,.2)}
-.dot.next{background:#f59e0b}
-.dot.sb-idle{background:#f59e0b;opacity:.5}
-.dot.sb-active{background:#f59e0b;box-shadow:0 0 0 3px rgba(245,158,11,.25)}
-.prog-track{background:var(--color-background-secondary);border-radius:99px;overflow:hidden;height:4px}
-#progress-bar{height:100%;border-radius:99px;background:var(--color-text-primary);transition:width 1s linear}
-.pill{font-size:11px;font-weight:500;padding:3px 9px;border-radius:99px}
-.pill-active{background:#f0fdf4;color:#16a34a}
-.pill-closed{background:var(--color-background-secondary);color:var(--color-text-tertiary)}
-.pill-sb{background:#fef3c7;color:#92400e}
+.mk{--bg:#f5f5f0;--surf:#ffffff;--bord:#e8e8e3;--bord-em:#1a1a1a;--txt:#1a1a1a;--txt2:#6b7280;--txt3:#9ca3af;--act-bg:#1a1a1a;--act-fg:#ffffff;--act-sub:rgba(255,255,255,0.4);--prog:#f3f4f6;--sb-card:#f9f5eb;--sb-bord:#fcd34d;--sb-txt:#92400e;--sb-sub:#b45309;--sb-prog:rgba(245,158,11,0.2);font-family:Inter,system-ui,sans-serif;color:var(--txt)}
+.mk.dk{--bg:#0f0f0f;--surf:#1c1c1e;--bord:#2c2c2e;--bord-em:#ffffff;--txt:#f2f2f7;--txt2:#8e8e93;--txt3:#636366;--act-bg:#ffffff;--act-fg:#1a1a1a;--act-sub:rgba(0,0,0,0.4);--prog:#2c2c2e;--sb-card:#27200a;--sb-bord:#92400e;--sb-txt:#fcd34d;--sb-sub:#fbbf24;--sb-prog:rgba(245,158,11,0.15)}
+.mk{background:var(--bg);padding:1.5rem 1rem 3rem;min-height:100vh;transition:background .3s,color .3s}
+.card{background:var(--surf);border:1px solid var(--bord);border-radius:12px;padding:1rem 1.25rem;transition:background .3s,border-color .3s}
+.lbl{font-size:11px;color:var(--txt3);letter-spacing:.07em;text-transform:uppercase;margin:0 0 5px}
+.dim{color:var(--txt3)}
+.srow{background:var(--surf);border:1px solid var(--bord);border-radius:12px;padding:12px 14px;transition:all .25s}
+.srow.act{background:var(--act-bg);border-color:var(--act-bg)}
+.srow.act .snm{color:var(--act-fg)!important}
+.srow.act .srng{color:var(--act-sub)!important}
+.srow.nxt{border:1.5px solid var(--bord-em)}
+.sb-inner{background:var(--sb-card);border:1px solid var(--sb-bord);border-radius:8px;padding:10px 12px;margin-top:8px;transition:background .3s,border-color .3s}
+.sb-inner.sb-on{border-color:#f59e0b}
+.tog{width:42px;height:24px;border-radius:12px;background:var(--bord);position:relative;cursor:pointer;transition:background .3s;border:none;padding:0;flex-shrink:0}
+.tog.on{background:var(--bord-em)}
+.thumb{width:18px;height:18px;background:#fff;border-radius:50%;position:absolute;top:3px;left:3px;transition:transform .25s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.tog.on .thumb{transform:translateX(18px)}
+.mk.dk .thumb{background:#1a1a1a}
+.prog-bar{height:100%;border-radius:99px;background:var(--act-bg);width:0%;transition:width 1s linear}
+@keyframes pg{0%,100%{box-shadow:0 0 0 3px rgba(34,197,94,.25)}50%{box-shadow:0 0 0 6px rgba(34,197,94,.08)}}
+@keyframes pa{0%,100%{box-shadow:0 0 0 3px rgba(245,158,11,.3)}50%{box-shadow:0 0 0 6px rgba(245,158,11,.08)}}
+.dot-g{background:#22c55e!important;animation:pg 2s ease-in-out infinite}
+.dot-a{background:#f59e0b!important;animation:pa 2s ease-in-out infinite}
 </style>
 
-<div style="max-width:480px;margin:0 auto;padding:1.5rem 1rem 3rem">
+<div class="mk" id="mk">
+<div style="max-width:420px;margin:0 auto">
 
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem">
+  <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:1.5rem">
     <div>
-      <p class="lbl" style="margin-bottom:3px">ICT Sessions</p>
-      <h1 style="font-size:22px;font-weight:500">Market Clock</h1>
+      <p class="lbl">ICT Sessions</p>
+      <h1 style="font-size:22px;font-weight:500;color:var(--txt);margin:0">Market Clock</h1>
     </div>
-    <div style="text-align:right">
-      <p class="dim" style="font-size:11px;margin-bottom:2px">Karachi</p>
-      <p style="font-size:13px;font-weight:500;color:var(--color-text-secondary)" id="khi-time">--:-- --</p>
+    <div style="display:flex;align-items:center;gap:12px">
+      <div style="text-align:right">
+        <p class="lbl" style="margin-bottom:2px">Karachi</p>
+        <p style="font-size:13px;font-weight:500;color:var(--txt2);margin:0" id="khi-time">--:-- --</p>
+      </div>
+      <div>
+        <p class="lbl" style="text-align:center;margin-bottom:4px" id="theme-icon">☀️</p>
+        <button class="tog" id="tog" onclick="toggleTheme()"><div class="thumb"></div></button>
+      </div>
     </div>
   </div>
 
   <div class="card" style="margin-bottom:10px">
-    <p class="lbl" style="margin-bottom:4px">New York time</p>
-    <p style="font-size:42px;font-weight:500;line-height:1;letter-spacing:-.5px" id="ny-time">--:-- --</p>
-    <p class="dim" style="font-size:13px;margin-top:4px" id="ny-date">---</p>
+    <p class="lbl">New York time</p>
+    <p style="font-size:40px;font-weight:500;color:var(--txt);line-height:1;letter-spacing:-1px;margin:0" id="ny-time">--:-- --</p>
+    <p style="font-size:13px;color:var(--txt3);margin:6px 0 0" id="ny-date">---</p>
   </div>
 
   <div class="card" style="margin-bottom:10px">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
       <div style="display:flex;align-items:center;gap:8px">
-        <div class="dot active"></div>
-        <p class="lbl">Now</p>
+        <div style="width:7px;height:7px;border-radius:50%;background:#22c55e;animation:pg 2s ease-in-out infinite"></div>
+        <p class="lbl" style="margin:0">Now</p>
       </div>
-      <span class="pill pill-closed" id="current-pill">CLOSED</span>
+      <span id="cur-pill" style="font-size:11px;font-weight:500;padding:3px 10px;border-radius:99px;background:var(--prog);color:var(--txt3)">Closed</span>
     </div>
-    <p style="font-size:17px;font-weight:500;margin-bottom:2px" id="current-name">Between sessions</p>
-    <p class="dim" style="font-size:13px;margin-bottom:14px" id="current-range">No session active</p>
-    <div class="prog-track">
-      <div id="progress-bar" style="width:0%"></div>
+    <p style="font-size:17px;font-weight:500;color:var(--txt);margin:0 0 2px" id="cur-name">Between sessions</p>
+    <p style="font-size:13px;color:var(--txt3);margin:0 0 14px" id="cur-range">No session active</p>
+    <div style="background:var(--prog);border-radius:99px;overflow:hidden;height:3px">
+      <div class="prog-bar" id="prog-bar"></div>
     </div>
     <div style="display:flex;justify-content:space-between;margin-top:6px">
-      <span class="dim" style="font-size:11px" id="prog-start">—</span>
-      <span style="font-size:11px;font-weight:500;color:var(--color-text-secondary)" id="prog-pct">Waiting</span>
-      <span class="dim" style="font-size:11px" id="prog-end">—</span>
+      <span style="font-size:11px;color:var(--txt3)" id="prog-s">—</span>
+      <span style="font-size:11px;font-weight:500;color:var(--txt2)" id="prog-p">Waiting</span>
+      <span style="font-size:11px;color:var(--txt3)" id="prog-e">—</span>
     </div>
   </div>
 
   <div class="card" style="margin-bottom:1.5rem">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
       <div style="display:flex;align-items:center;gap:8px">
-        <div class="dot next"></div>
-        <p class="lbl">Up next</p>
+        <div style="width:7px;height:7px;border-radius:50%;background:#f59e0b"></div>
+        <p class="lbl" style="margin:0">Up next</p>
       </div>
       <div style="text-align:right">
-        <p class="dim" style="font-size:10px;margin-bottom:1px">starts in</p>
-        <p style="font-size:13px;font-weight:500;color:#f59e0b;font-variant-numeric:tabular-nums" id="next-countdown">--:--</p>
+        <p style="font-size:10px;color:var(--txt3);margin:0 0 1px">starts in</p>
+        <p style="font-size:13px;font-weight:500;color:#b45309;font-variant-numeric:tabular-nums;margin:0" id="nxt-cd">--:--</p>
       </div>
     </div>
-    <p style="font-size:15px;font-weight:500;margin-bottom:2px" id="next-name">—</p>
-    <p class="dim" style="font-size:13px" id="next-range">—</p>
+    <p style="font-size:15px;font-weight:500;color:var(--txt);margin:0 0 2px" id="nxt-name">—</p>
+    <p style="font-size:13px;color:var(--txt3);margin:0" id="nxt-range">—</p>
   </div>
 
   <p class="lbl" style="margin-bottom:10px">All sessions · NY time</p>
-  <div style="display:flex;flex-direction:column;gap:6px" id="sessions-list"></div>
+  <div style="display:flex;flex-direction:column;gap:6px" id="sess-list"></div>
 
+</div>
 </div>
 
 <script>
-const SESSIONS=[
-  {id:'london_mid',  name:'London midnight',    start:'00:00',end:'02:00'},
-  {id:'london_kz',   name:'London kill zone',   start:'02:00',end:'05:00', children:[
-    {id:'silver_bullet', name:'Silver Bullet',  start:'03:00',end:'04:00', note:'ICT entry window'}
-  ]},
-  {id:'london_lunch',name:'London lunch',       start:'05:00',end:'07:00'},
-  {id:'ny_kz',       name:'New York kill zone', start:'07:00',end:'10:00', children:[
-    {id:'cme_open',      name:'CME open',       start:'08:20',end:'10:00'}
-  ]},
-  {id:'london_close',name:'London close KZ',   start:'10:00',end:'12:00'},
-  {id:'central_bank',name:'Central bank range', start:'14:00',end:'20:00'},
-  {id:'asian',       name:'Asian range',        start:'20:00',end:'22:00'},
+const SESS=[
+  {id:'lmid',  name:'London midnight',    s:'00:00',e:'02:00'},
+  {id:'lkz',   name:'London kill zone',   s:'02:00',e:'05:00',sb:{s:'03:00',e:'04:00',lbl:'Silver Bullet · 3–4 AM'}},
+  {id:'llunch',name:'London lunch',       s:'05:00',e:'07:00'},
+  {id:'nykz',  name:'New York kill zone', s:'07:00',e:'10:00'},
+  {id:'cme',   name:'CME open',           s:'08:20',e:'10:00'},
+  {id:'lclose',name:'London close KZ',    s:'10:00',e:'12:00',sb:{s:'10:00',e:'11:00',lbl:'Silver Bullet · 10–11 AM'}},
+  {id:'cbr',   name:'Central bank range', s:'14:00',e:'20:00',sb:{s:'14:00',e:'15:00',lbl:'Silver Bullet · 2–3 PM'}},
+  {id:'asian', name:'Asian range',        s:'20:00',e:'22:00'},
 ];
+const tm=h=>{const[a,b]=h.split(':').map(Number);return a*60+b};
+const f12=h=>{const[a,b]=h.split(':').map(Number),ap=a<12?'AM':'PM',h2=a%12||12;return`${h2}:${String(b).padStart(2,'0')} ${ap}`};
+const fck=(d,z)=>d.toLocaleTimeString('en-US',{timeZone:z,hour:'numeric',minute:'2-digit',second:'2-digit',hour12:true});
+const fdt=(d,z)=>d.toLocaleDateString('en-US',{timeZone:z,weekday:'long',month:'short',day:'numeric'});
+const fcd=m=>{const h=Math.floor(Math.abs(m)/60),mn=Math.floor(Math.abs(m)%60);return h>0?`${h}h ${String(mn).padStart(2,'0')}m`:`${mn}m`};
+function nym(d){const s=d.toLocaleString('en-US',{timeZone:'America/New_York',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false});const t=s.includes(', ')?s.split(', ').pop():s;const[h,m,sc]=t.split(':').map(Number);return h*60+m+sc/60}
 
-function toMins(hhmm){const[h,m]=hhmm.split(':').map(Number);return h*60+m}
-function fmt12(hhmm){const[h,m]=hhmm.split(':').map(Number);const ap=h<12?'AM':'PM';const h12=h%12===0?12:h%12;return`${h12}:${String(m).padStart(2,'0')} ${ap}`}
-function fmtClock(date,tz){return date.toLocaleTimeString('en-US',{timeZone:tz,hour:'numeric',minute:'2-digit',second:'2-digit',hour12:true})}
-function fmtDate(date,tz){return date.toLocaleDateString('en-US',{timeZone:tz,weekday:'long',month:'short',day:'numeric'})}
-function getNYMins(date){const s=date.toLocaleString('en-US',{timeZone:'America/New_York',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false});const t=s.includes(', ')?s.split(', ').pop():s;const[h,m,sc]=t.split(':').map(Number);return h*60+m+sc/60}
-function fmtCD(mins){const h=Math.floor(Math.abs(mins)/60);const m=Math.floor(Math.abs(mins)%60);return h>0?`${h}h ${String(m).padStart(2,'0')}m`:`${m}m`}
+const list=document.getElementById('sess-list');
+SESS.forEach(s=>{
+  const w=document.createElement('div');
+  w.innerHTML=`<div id="row-${s.id}" class="srow">
+    <div style="display:flex;align-items:center;justify-content:space-between">
+      <div style="display:flex;align-items:center;gap:8px">
+        <div id="dot-${s.id}" style="width:7px;height:7px;border-radius:50%;background:var(--txt3);flex-shrink:0;transition:all .3s"></div>
+        <span class="snm" id="nm-${s.id}" style="font-size:13px;font-weight:500;color:var(--txt)">${s.name}</span>
+      </div>
+      <span class="srng dim" id="rng-${s.id}" style="font-size:12px;font-variant-numeric:tabular-nums">${f12(s.s)} – ${f12(s.e)}</span>
+    </div>
+    ${s.sb?`<div id="sb-${s.id}" class="sb-inner">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <div style="display:flex;align-items:center;gap:6px">
+          <div id="sbd-${s.id}" style="width:6px;height:6px;border-radius:50%;background:#f59e0b;opacity:.45;flex-shrink:0;transition:all .3s"></div>
+          <span style="font-size:12px;font-weight:500;color:var(--sb-txt)">${s.sb.lbl}</span>
+        </div>
+        <span id="sbpill-${s.id}" style="font-size:11px;font-weight:500;padding:2px 8px;border-radius:99px;background:rgba(245,158,11,.15);color:var(--sb-sub)">waiting</span>
+      </div>
+      <div style="background:var(--sb-prog);border-radius:99px;overflow:hidden;height:3px;margin-bottom:6px">
+        <div id="sbbar-${s.id}" style="height:100%;border-radius:99px;background:#f59e0b;width:0%;transition:width 1s linear"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between">
+        <span style="font-size:11px;color:var(--sb-sub)">${f12(s.sb.s)}</span>
+        <span id="sbpct-${s.id}" style="font-size:11px;font-weight:500;color:var(--sb-txt)">—</span>
+        <span style="font-size:11px;color:var(--sb-sub)">${f12(s.sb.e)}</span>
+      </div>
+    </div>`:''}
+  </div>`;
+  list.appendChild(w);
+});
 
-const list=document.getElementById('sessions-list');
-
-function buildRow(s, isChild){
-  const wrap=document.createElement('div');
-
-  const row=document.createElement('div');
-  row.id='row-'+s.id;
-  row.className=isChild?'child-row':'session-row';
-
-  const left=document.createElement('div');
-  left.style.cssText='display:flex;align-items:center;gap:8px';
-
-  const dot=document.createElement('div');
-  dot.id='dot-'+s.id;
-  dot.className='dot'+(s.id==='silver_bullet'?' sb-idle':'');
-  left.appendChild(dot);
-
-  const nameEl=document.createElement('div');
-  nameEl.style.cssText='display:flex;align-items:center;gap:6px';
-  const nm=document.createElement('span');
-  nm.id='name-'+s.id;
-  nm.className=isChild?'child-name':'row-name';
-  nm.style.cssText=`font-size:${isChild?'12':'13'}px;font-weight:500;color:var(--color-text-primary)`;
-  nm.textContent=s.name;
-  nameEl.appendChild(nm);
-  if(s.note){
-    const badge=document.createElement('span');
-    badge.style.cssText='font-size:10px;padding:2px 6px;border-radius:99px;background:#fef3c7;color:#92400e;font-weight:500';
-    badge.textContent=s.note;
-    nameEl.appendChild(badge);
-  }
-  left.appendChild(nameEl);
-  row.appendChild(left);
-
-  const rng=document.createElement('span');
-  rng.id='range-'+s.id;
-  rng.className=isChild?'child-range dim':'row-range dim';
-  rng.style.cssText=`font-size:11px;font-variant-numeric:tabular-nums`;
-  rng.textContent=`${fmt12(s.start)} – ${fmt12(s.end)}`;
-  row.appendChild(rng);
-
-  wrap.appendChild(row);
-
-  if(s.children&&s.children.length){
-    const childWrap=document.createElement('div');
-    childWrap.id='children-'+s.id;
-    childWrap.style.cssText='margin-top:5px;margin-left:18px;display:flex;flex-direction:column;gap:4px';
-    s.children.forEach(c=>childWrap.appendChild(buildRow(c,true)));
-    wrap.appendChild(childWrap);
-  }
-
-  return wrap;
+let dark=window.matchMedia('(prefers-color-scheme: dark)').matches;
+const saved=localStorage.getItem('mck5');
+if(saved!==null) dark=saved==='1';
+function applyTheme(){
+  const mk=document.getElementById('mk');
+  const tog=document.getElementById('tog');
+  const icon=document.getElementById('theme-icon');
+  if(dark){mk.classList.add('dk');tog.classList.add('on');icon.textContent='🌙';}
+  else{mk.classList.remove('dk');tog.classList.remove('on');icon.textContent='☀️';}
+  localStorage.setItem('mck5',dark?'1':'0');
 }
+function toggleTheme(){dark=!dark;applyTheme();}
+applyTheme();
 
-SESSIONS.forEach(s=>list.appendChild(buildRow(s,false)));
-
-function getAllSessions(){
-  const all=[];
-  SESSIONS.forEach(s=>{all.push(s);if(s.children)s.children.forEach(c=>all.push(c))});
-  return all;
-}
-
-function update(){
+function tick(){
   const now=new Date();
-  document.getElementById('ny-time').textContent=fmtClock(now,'America/New_York');
-  document.getElementById('ny-date').textContent=fmtDate(now,'America/New_York');
-  document.getElementById('khi-time').textContent=fmtClock(now,'Asia/Karachi');
-  const nyM=getNYMins(now);
-
-  const all=getAllSessions();
-
-  // reset all
-  all.forEach(s=>{
-    const row=document.getElementById('row-'+s.id);
-    const dot=document.getElementById('dot-'+s.id);
-    const nm=document.getElementById('name-'+s.id);
-    const rng=document.getElementById('range-'+s.id);
-    if(!row)return;
-    const isChild=s.id==='silver_bullet'||s.id==='cme_open';
-    row.className=isChild?'child-row':'session-row';
-    dot.className='dot'+(s.id==='silver_bullet'?' sb-idle':'');
-    dot.style.background='';dot.style.boxShadow='';
-    nm.style.color='var(--color-text-primary)';
-    rng.style.color='';
+  document.getElementById('ny-time').textContent=fck(now,'America/New_York');
+  document.getElementById('ny-date').textContent=fdt(now,'America/New_York');
+  document.getElementById('khi-time').textContent=fck(now,'Asia/Karachi');
+  const ny=nym(now);
+  let act=null,nxt=null,mg=Infinity;
+  SESS.forEach(s=>{
+    const st=tm(s.s),en=tm(s.e);
+    if(ny>=st&&ny<en)act={s,el:ny-st,tot:en-st,lft:en-ny};
+    let g=st-ny;if(g<=0)g+=1440;if(g<mg){mg=g;nxt={s,g};}
   });
 
-  // find active top-level and child
-  let activeTop=null, activeChild=null, next=null, minGap=Infinity;
-
-  SESSIONS.forEach(s=>{
-    const st=toMins(s.start),en=toMins(s.end);
-    if(nyM>=st&&nyM<en) activeTop={session:s,elapsed:nyM-st,total:en-st,left:en-nyM};
-    let gap=st-nyM;if(gap<=0)gap+=1440;
-    if(gap<minGap){minGap=gap;next={session:s,inMins:gap}}
-    if(s.children){
-      s.children.forEach(c=>{
-        const cst=toMins(c.start),cen=toMins(c.end);
-        if(nyM>=cst&&nyM<cen) activeChild={session:c,elapsed:nyM-cst,total:cen-cst,left:cen-nyM};
-        let cgap=cst-nyM;if(cgap<=0)cgap+=1440;
-        if(cgap<minGap){minGap=cgap;next={session:c,inMins:cgap}}
-      });
+  SESS.forEach(s=>{
+    document.getElementById('row-'+s.id).className='srow';
+    const dot=document.getElementById('dot-'+s.id);
+    dot.style.background='var(--txt3)';dot.style.animation='';dot.style.boxShadow='';
+    document.getElementById('nm-'+s.id).style.color='var(--txt)';
+    document.getElementById('rng-'+s.id).style.color='var(--txt3)';
+    if(s.sb){
+      const sst=tm(s.sb.s),sen=tm(s.sb.e),on=ny>=sst&&ny<sen;
+      document.getElementById('sb-'+s.id).className='sb-inner'+(on?' sb-on':'');
+      const sbd=document.getElementById('sbd-'+s.id);
+      const sbpill=document.getElementById('sbpill-'+s.id);
+      const sbbar=document.getElementById('sbbar-'+s.id);
+      const sbpct=document.getElementById('sbpct-'+s.id);
+      if(on){
+        sbd.style.opacity='1';sbd.style.animation='pa 2s ease-in-out infinite';
+        sbpill.textContent='active';sbpill.style.background='rgba(245,158,11,.3)';
+        const pct=Math.round(((ny-sst)/(sen-sst))*100);
+        sbbar.style.width=pct+'%';
+        sbpct.textContent=`${pct}% · ${fcd(sen-ny)} left`;
+      } else {
+        sbd.style.opacity='.45';sbd.style.animation='';
+        sbpill.textContent='waiting';sbpill.style.background='rgba(245,158,11,.15)';
+        sbbar.style.width='0%';
+        let sg=sst-ny;if(sg<=0)sg+=1440;
+        sbpct.textContent=`in ${fcd(sg)}`;
+      }
     }
   });
 
-  const displayActive=activeChild||activeTop;
-  const isSB=activeChild&&activeChild.session.id==='silver_bullet';
-
-  if(displayActive){
-    const s=displayActive.session;
-    document.getElementById('current-name').textContent=s.name;
-    document.getElementById('current-range').textContent=`${fmt12(s.start)} – ${fmt12(s.end)} NY`;
-    document.getElementById('current-pill').textContent='ACTIVE';
-    document.getElementById('current-pill').className='pill '+(isSB?'pill-sb':'pill-active');
-    const pct=Math.round((displayActive.elapsed/displayActive.total)*100);
-    document.getElementById('progress-bar').style.width=pct+'%';
-    document.getElementById('prog-start').textContent=fmt12(s.start);
-    document.getElementById('prog-pct').textContent=`${pct}% · ${fmtCD(displayActive.left)} left`;
-    document.getElementById('prog-end').textContent=fmt12(s.end);
-  } else {
-    document.getElementById('current-name').textContent='Between sessions';
-    document.getElementById('current-range').textContent='No session currently active';
-    document.getElementById('current-pill').textContent='CLOSED';
-    document.getElementById('current-pill').className='pill pill-closed';
-    document.getElementById('progress-bar').style.width='0%';
-    document.getElementById('prog-start').textContent='—';
-    document.getElementById('prog-pct').textContent='Waiting';
-    document.getElementById('prog-end').textContent='—';
-  }
-
-  // highlight active top row
-  if(activeTop){
-    const s=activeTop.session;
-    const row=document.getElementById('row-'+s.id);
+  const pill=document.getElementById('cur-pill');
+  if(act){
+    const s=act.s;
+    document.getElementById('cur-name').textContent=s.name;
+    document.getElementById('cur-range').textContent=`${f12(s.s)} – ${f12(s.e)} NY`;
+    pill.textContent='Active';pill.style.background='#dcfce7';pill.style.color='#166534';
+    const pct=Math.round((act.el/act.tot)*100);
+    document.getElementById('prog-bar').style.width=pct+'%';
+    document.getElementById('prog-s').textContent=f12(s.s);
+    document.getElementById('prog-p').textContent=`${pct}% · ${fcd(act.lft)} left`;
+    document.getElementById('prog-e').textContent=f12(s.e);
+    document.getElementById('row-'+s.id).className='srow act';
     const dot=document.getElementById('dot-'+s.id);
-    row.className='session-row is-active';
-    dot.className='dot active';
-    document.getElementById('name-'+s.id).style.color='var(--color-background-primary)';
-    document.getElementById('range-'+s.id).style.color='rgba(255,255,255,.4)';
+    dot.style.background='#22c55e';dot.style.animation='pg 2s ease-in-out infinite';
+    document.getElementById('nm-'+s.id).style.color='var(--act-fg)';
+    document.getElementById('rng-'+s.id).style.color='var(--act-sub)';
+  } else {
+    document.getElementById('cur-name').textContent='Between sessions';
+    document.getElementById('cur-range').textContent='No session active';
+    pill.textContent='Closed';pill.style.background='var(--prog)';pill.style.color='var(--txt3)';
+    document.getElementById('prog-bar').style.width='0%';
+    document.getElementById('prog-s').textContent='—';
+    document.getElementById('prog-p').textContent='Waiting';
+    document.getElementById('prog-e').textContent='—';
   }
-
-  // highlight active child row
-  if(activeChild){
-    const c=activeChild.session;
-    const crow=document.getElementById('row-'+c.id);
-    const cdot=document.getElementById('dot-'+c.id);
-    crow.className='child-row is-active';
-    cdot.className='dot sb-active';
-    document.getElementById('name-'+c.id).style.color='#92400e';
-    document.getElementById('range-'+c.id).style.color='#b45309';
-  }
-
-  // next session
-  if(next){
-    const s=next.session;
-    document.getElementById('next-name').textContent=s.name;
-    document.getElementById('next-range').textContent=`${fmt12(s.start)} – ${fmt12(s.end)} NY`;
-    document.getElementById('next-countdown').textContent=fmtCD(next.inMins);
-    const isChild=s.id==='silver_bullet'||s.id==='cme_open';
-    if(!displayActive||displayActive.session.id!==s.id){
-      const row=document.getElementById('row-'+s.id);
+  if(nxt){
+    const s=nxt.s;
+    document.getElementById('nxt-name').textContent=s.name;
+    document.getElementById('nxt-range').textContent=`${f12(s.s)} – ${f12(s.e)} NY`;
+    document.getElementById('nxt-cd').textContent=fcd(nxt.g);
+    if(!act||act.s.id!==s.id){
+      document.getElementById('row-'+s.id).className='srow nxt';
       const dot=document.getElementById('dot-'+s.id);
-      if(row&&!isChild){row.className='session-row is-next'}
-      if(dot&&!isChild){dot.className='dot next'}
+      dot.style.background='#f59e0b';dot.style.animation='';
     }
   }
 }
-
-update();setInterval(update,1000);
+tick();setInterval(tick,1000);
 </script>
