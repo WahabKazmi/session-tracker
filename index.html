@@ -1,380 +1,279 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="SessionClock">
-<meta name="theme-color" id="theme-color-meta" content="#1a1a1a">
-<title>Market Session Clock</title>
-<link rel="manifest" href="manifest.json">
-<link rel="apple-touch-icon" href="icon-192.png">
-<script src="https://cdn.tailwindcss.com"></script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-
-  :root {
-    --bg:        #f5f5f0;
-    --surface:   #ffffff;
-    --border:    #e8e8e3;
-    --border-em: #1a1a1a;
-    --text:      #1a1a1a;
-    --text-sub:  #6b7280;
-    --text-dim:  #9ca3af;
-    --active-bg: #1a1a1a;
-    --active-fg: #ffffff;
-    --active-sub:rgba(255,255,255,0.45);
-    --prog-bg:   #f3f4f6;
-    --prog-fill: #1a1a1a;
-    --closed-bg: #f3f4f6;
-    --closed-fg: #9ca3af;
-  }
-
-  [data-theme="dark"] {
-    --bg:        #0f0f0f;
-    --surface:   #1c1c1e;
-    --border:    #2c2c2e;
-    --border-em: #ffffff;
-    --text:      #f2f2f7;
-    --text-sub:  #8e8e93;
-    --text-dim:  #636366;
-    --active-bg: #ffffff;
-    --active-fg: #1a1a1a;
-    --active-sub:rgba(0,0,0,0.45);
-    --prog-bg:   #2c2c2e;
-    --prog-fill: #ffffff;
-    --closed-bg: #2c2c2e;
-    --closed-fg: #636366;
-  }
-
-  html, body {
-    font-family: 'Inter', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    min-height: 100dvh;
-    transition: background 0.3s, color 0.3s;
-  }
-
-  .card {
-    background: var(--surface);
-    border: 1.5px solid var(--border);
-    transition: background 0.3s, border-color 0.3s;
-  }
-
-  .label { color: var(--text-sub); }
-  .dim   { color: var(--text-dim); }
-
-  /* Session rows */
-  .session-row {
-    background: var(--surface);
-    border: 1.5px solid var(--border);
-    transition: all 0.3s;
-  }
-  .session-row.is-active {
-    background: var(--active-bg);
-    border-color: var(--active-bg);
-    color: var(--active-fg);
-  }
-  .session-row.is-next {
-    background: var(--surface);
-    border: 1.5px solid var(--border-em);
-  }
-  .session-row.is-next .row-name { color: var(--text); }
-
-  /* Dots */
-  .dot-idle   { background: var(--text-dim); }
-  .dot-active { background: #22c55e; animation: pulse-green 2s ease-in-out infinite; }
-  .dot-next   { background: #f59e0b; }
-
-  @keyframes pulse-green {
-    0%, 100% { box-shadow: 0 0 0 3px rgba(34,197,94,0.25); }
-    50%       { box-shadow: 0 0 0 6px rgba(34,197,94,0.1); }
-  }
-
-  /* Toggle switch */
-  .toggle-track {
-    width: 44px; height: 26px;
-    background: var(--border);
-    border-radius: 13px;
-    position: relative;
-    cursor: pointer;
-    transition: background 0.3s;
-    flex-shrink: 0;
-  }
-  .toggle-track.on { background: #1a1a1a; }
-  [data-theme="dark"] .toggle-track.on { background: #f2f2f7; }
-  .toggle-thumb {
-    width: 20px; height: 20px;
-    background: #fff;
-    border-radius: 50%;
-    position: absolute;
-    top: 3px; left: 3px;
-    transition: transform 0.3s, background 0.3s;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
-  }
-  .toggle-track.on .toggle-thumb {
-    transform: translateX(18px);
-  }
-  [data-theme="dark"] .toggle-track.on .toggle-thumb { background: #1a1a1a; }
-
-  /* Progress bar track */
-  .prog-track {
-    background: var(--prog-bg);
-    transition: background 0.3s;
-  }
-  #progress-bar {
-    background: var(--prog-fill);
-    transition: width 1s linear, background 0.3s;
-  }
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',sans-serif;background:var(--color-background-tertiary);color:var(--color-text-primary);min-height:100vh}
+.card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:1rem 1.25rem}
+.lbl{color:var(--color-text-tertiary);font-size:11px;font-weight:500;letter-spacing:.07em;text-transform:uppercase}
+.dim{color:var(--color-text-tertiary)}
+.session-row{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:10px 14px;display:flex;align-items:center;justify-content:space-between;transition:all .3s}
+.session-row.is-active{background:var(--color-text-primary);border-color:var(--color-text-primary)}
+.session-row.is-active .row-name{color:var(--color-background-primary)!important}
+.session-row.is-active .row-range{color:rgba(255,255,255,.4)!important}
+.session-row.is-next{border:1px solid var(--color-border-primary)}
+.child-row{border-radius:6px;padding:8px 12px;display:flex;align-items:center;justify-content:space-between;transition:all .3s;border:0.5px solid var(--color-border-tertiary);background:var(--color-background-secondary)}
+.child-row.is-active{background:#fef3c7;border-color:#f59e0b}
+.child-row.is-active .child-name{color:#92400e!important}
+.child-row.is-active .child-range{color:#b45309!important}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--color-border-secondary);flex-shrink:0;transition:all .3s}
+.dot.active{background:#22c55e;box-shadow:0 0 0 3px rgba(34,197,94,.2)}
+.dot.next{background:#f59e0b}
+.dot.sb-idle{background:#f59e0b;opacity:.5}
+.dot.sb-active{background:#f59e0b;box-shadow:0 0 0 3px rgba(245,158,11,.25)}
+.prog-track{background:var(--color-background-secondary);border-radius:99px;overflow:hidden;height:4px}
+#progress-bar{height:100%;border-radius:99px;background:var(--color-text-primary);transition:width 1s linear}
+.pill{font-size:11px;font-weight:500;padding:3px 9px;border-radius:99px}
+.pill-active{background:#f0fdf4;color:#16a34a}
+.pill-closed{background:var(--color-background-secondary);color:var(--color-text-tertiary)}
+.pill-sb{background:#fef3c7;color:#92400e}
 </style>
-</head>
-<body>
 
-<div class="max-w-md mx-auto px-4 pt-8 pb-12">
+<div style="max-width:480px;margin:0 auto;padding:1.5rem 1rem 3rem">
 
-  <!-- Header -->
-  <div class="flex items-center justify-between mb-6">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem">
     <div>
-      <p class="text-xs font-semibold tracking-widest dim uppercase mb-0.5">ICT Sessions</p>
-      <h1 class="text-2xl font-bold" style="color:var(--text)">Market Clock</h1>
+      <p class="lbl" style="margin-bottom:3px">ICT Sessions</p>
+      <h1 style="font-size:22px;font-weight:500">Market Clock</h1>
     </div>
-    <div class="flex items-center gap-3">
-      <div class="text-right">
-        <p class="text-xs dim mb-0.5">Karachi</p>
-        <p class="text-sm font-semibold label" id="khi-time">--:-- --</p>
-      </div>
-      <!-- Dark mode toggle -->
-      <div>
-        <p class="text-xs dim mb-1 text-center">
-          <span id="theme-icon">☀️</span>
-        </p>
-        <div class="toggle-track" id="toggle" onclick="toggleTheme()">
-          <div class="toggle-thumb"></div>
-        </div>
-      </div>
+    <div style="text-align:right">
+      <p class="dim" style="font-size:11px;margin-bottom:2px">Karachi</p>
+      <p style="font-size:13px;font-weight:500;color:var(--color-text-secondary)" id="khi-time">--:-- --</p>
     </div>
   </div>
 
-  <!-- NY Clock -->
-  <div class="card rounded-2xl px-5 py-4 mb-4 shadow-sm">
-    <p class="text-xs font-semibold tracking-widest dim uppercase mb-1">New York Time</p>
-    <p class="text-5xl font-bold tracking-tight leading-none" style="color:var(--text)" id="ny-time">--:-- --</p>
-    <p class="text-sm dim mt-1.5" id="ny-date">---</p>
+  <div class="card" style="margin-bottom:10px">
+    <p class="lbl" style="margin-bottom:4px">New York time</p>
+    <p style="font-size:42px;font-weight:500;line-height:1;letter-spacing:-.5px" id="ny-time">--:-- --</p>
+    <p class="dim" style="font-size:13px;margin-top:4px" id="ny-date">---</p>
   </div>
 
-  <!-- Current Session -->
-  <div class="card rounded-2xl px-5 py-4 mb-3 shadow-sm">
-    <div class="flex items-center justify-between mb-3">
-      <div class="flex items-center gap-2">
-        <div class="w-2 h-2 rounded-full dot-active"></div>
-        <p class="text-xs font-semibold tracking-widest dim uppercase">Now</p>
+  <div class="card" style="margin-bottom:10px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+      <div style="display:flex;align-items:center;gap:8px">
+        <div class="dot active"></div>
+        <p class="lbl">Now</p>
       </div>
-      <span class="text-xs font-bold px-2.5 py-1 rounded-full" id="current-pill">ACTIVE</span>
+      <span class="pill pill-closed" id="current-pill">CLOSED</span>
     </div>
-    <p class="text-xl font-bold mb-0.5" style="color:var(--text)" id="current-name">—</p>
-    <p class="text-sm dim mb-4" id="current-range">—</p>
-    <div class="h-1.5 prog-track rounded-full overflow-hidden">
-      <div id="progress-bar" class="h-full rounded-full" style="width:0%"></div>
+    <p style="font-size:17px;font-weight:500;margin-bottom:2px" id="current-name">Between sessions</p>
+    <p class="dim" style="font-size:13px;margin-bottom:14px" id="current-range">No session active</p>
+    <div class="prog-track">
+      <div id="progress-bar" style="width:0%"></div>
     </div>
-    <div class="flex justify-between mt-1.5">
-      <span class="text-xs dim" id="prog-start">—</span>
-      <span class="text-xs font-medium label" id="prog-pct">—</span>
-      <span class="text-xs dim" id="prog-end">—</span>
+    <div style="display:flex;justify-content:space-between;margin-top:6px">
+      <span class="dim" style="font-size:11px" id="prog-start">—</span>
+      <span style="font-size:11px;font-weight:500;color:var(--color-text-secondary)" id="prog-pct">Waiting</span>
+      <span class="dim" style="font-size:11px" id="prog-end">—</span>
     </div>
   </div>
 
-  <!-- Next Session -->
-  <div class="card rounded-2xl px-5 py-4 mb-7 shadow-sm">
-    <div class="flex items-center justify-between mb-2">
-      <div class="flex items-center gap-2">
-        <div class="w-2 h-2 rounded-full dot-next"></div>
-        <p class="text-xs font-semibold tracking-widest dim uppercase">Up Next</p>
+  <div class="card" style="margin-bottom:1.5rem">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+      <div style="display:flex;align-items:center;gap:8px">
+        <div class="dot next"></div>
+        <p class="lbl">Up next</p>
       </div>
-      <div class="text-right">
-        <p class="text-xs dim mb-0.5">starts in</p>
-        <p class="text-sm font-bold tabular-nums text-amber-500" id="next-countdown">--:--</p>
+      <div style="text-align:right">
+        <p class="dim" style="font-size:10px;margin-bottom:1px">starts in</p>
+        <p style="font-size:13px;font-weight:500;color:#f59e0b;font-variant-numeric:tabular-nums" id="next-countdown">--:--</p>
       </div>
     </div>
-    <p class="text-lg font-bold mb-0.5" style="color:var(--text)" id="next-name">—</p>
-    <p class="text-sm dim" id="next-range">—</p>
+    <p style="font-size:15px;font-weight:500;margin-bottom:2px" id="next-name">—</p>
+    <p class="dim" style="font-size:13px" id="next-range">—</p>
   </div>
 
-  <!-- All Sessions -->
-  <p class="text-xs font-semibold tracking-widest dim uppercase mb-3">All Sessions · NY Time</p>
-  <div class="flex flex-col gap-2" id="sessions-list"></div>
+  <p class="lbl" style="margin-bottom:10px">All sessions · NY time</p>
+  <div style="display:flex;flex-direction:column;gap:6px" id="sessions-list"></div>
 
 </div>
 
 <script>
-// ── Theme ──────────────────────────────────────────────────────────────
-const saved = localStorage.getItem('theme') || 'light';
-applyTheme(saved);
-
-function applyTheme(t) {
-  document.documentElement.setAttribute('data-theme', t);
-  const tog = document.getElementById('toggle');
-  const icon = document.getElementById('theme-icon');
-  const meta = document.getElementById('theme-color-meta');
-  if (t === 'dark') {
-    tog.classList.add('on');
-    icon.textContent = '🌙';
-    meta.content = '#0f0f0f';
-  } else {
-    tog.classList.remove('on');
-    icon.textContent = '☀️';
-    meta.content = '#f5f5f0';
-  }
-}
-
-function toggleTheme() {
-  const curr = document.documentElement.getAttribute('data-theme');
-  const next = curr === 'dark' ? 'light' : 'dark';
-  localStorage.setItem('theme', next);
-  applyTheme(next);
-}
-
-// ── Sessions ──────────────────────────────────────────────────────────
-const SESSIONS = [
-  { id: 'london_midnight', name: 'London Midnight',       start: '00:00', end: '02:00' },
-  { id: 'london_kz',       name: 'London Kill Zone',      start: '02:00', end: '05:00' },
-  { id: 'london_lunch',    name: 'London Lunch',          start: '05:00', end: '07:00' },
-  { id: 'ny_kz',           name: 'New York Kill Zone',    start: '07:00', end: '10:00' },
-  { id: 'cme_open',        name: 'CME Open',              start: '08:20', end: '10:00' },
-  { id: 'london_close_kz', name: 'London Close KZ',       start: '10:00', end: '12:00' },
-  { id: 'central_bank',    name: 'Central Bank Range',    start: '14:00', end: '20:00' },
-  { id: 'asian_session',   name: 'Asian Range',           start: '20:00', end: '22:00' },
+const SESSIONS=[
+  {id:'london_mid',  name:'London midnight',    start:'00:00',end:'02:00'},
+  {id:'london_kz',   name:'London kill zone',   start:'02:00',end:'05:00', children:[
+    {id:'silver_bullet', name:'Silver Bullet',  start:'03:00',end:'04:00', note:'ICT entry window'}
+  ]},
+  {id:'london_lunch',name:'London lunch',       start:'05:00',end:'07:00'},
+  {id:'ny_kz',       name:'New York kill zone', start:'07:00',end:'10:00', children:[
+    {id:'cme_open',      name:'CME open',       start:'08:20',end:'10:00'}
+  ]},
+  {id:'london_close',name:'London close KZ',   start:'10:00',end:'12:00'},
+  {id:'central_bank',name:'Central bank range', start:'14:00',end:'20:00'},
+  {id:'asian',       name:'Asian range',        start:'20:00',end:'22:00'},
 ];
 
-function toMins(hhmm) {
-  const [h, m] = hhmm.split(':').map(Number);
-  return h * 60 + m;
-}
-function fmt12(hhmm) {
-  const [h, m] = hhmm.split(':').map(Number);
-  const ampm = h < 12 ? 'AM' : 'PM';
-  const h12 = h % 12 === 0 ? 12 : h % 12;
-  return `${h12}:${String(m).padStart(2,'0')} ${ampm}`;
-}
-function getNYMinutes(date) {
-  const s = date.toLocaleString('en-US', { timeZone: 'America/New_York', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
-  const time = s.split(', ').pop();
-  const [h, m, sec] = time.split(':').map(Number);
-  return h * 60 + m + sec / 60;
-}
-function fmtClock(date, tz) {
-  return date.toLocaleTimeString('en-US', { timeZone: tz, hour: 'numeric', minute: '2-digit', second: '2-digit', hour12: true });
-}
-function fmtDate(date, tz) {
-  return date.toLocaleDateString('en-US', { timeZone: tz, weekday: 'long', month: 'short', day: 'numeric' });
-}
-function fmtCountdown(mins) {
-  const h = Math.floor(Math.abs(mins) / 60);
-  const m = Math.floor(Math.abs(mins) % 60);
-  return h > 0 ? `${h}h ${String(m).padStart(2,'0')}m` : `${m}m`;
-}
-function getStatus(nyMins) {
-  let active = null, next = null, minGap = Infinity;
-  for (const s of SESSIONS) {
-    const st = toMins(s.start), en = toMins(s.end);
-    if (nyMins >= st && nyMins < en)
-      active = { session: s, elapsed: nyMins - st, total: en - st, left: en - nyMins };
-    let gap = st - nyMins;
-    if (gap <= 0) gap += 1440;
-    if (gap < minGap) { minGap = gap; next = { session: s, inMins: gap }; }
+function toMins(hhmm){const[h,m]=hhmm.split(':').map(Number);return h*60+m}
+function fmt12(hhmm){const[h,m]=hhmm.split(':').map(Number);const ap=h<12?'AM':'PM';const h12=h%12===0?12:h%12;return`${h12}:${String(m).padStart(2,'0')} ${ap}`}
+function fmtClock(date,tz){return date.toLocaleTimeString('en-US',{timeZone:tz,hour:'numeric',minute:'2-digit',second:'2-digit',hour12:true})}
+function fmtDate(date,tz){return date.toLocaleDateString('en-US',{timeZone:tz,weekday:'long',month:'short',day:'numeric'})}
+function getNYMins(date){const s=date.toLocaleString('en-US',{timeZone:'America/New_York',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false});const t=s.includes(', ')?s.split(', ').pop():s;const[h,m,sc]=t.split(':').map(Number);return h*60+m+sc/60}
+function fmtCD(mins){const h=Math.floor(Math.abs(mins)/60);const m=Math.floor(Math.abs(mins)%60);return h>0?`${h}h ${String(m).padStart(2,'0')}m`:`${m}m`}
+
+const list=document.getElementById('sessions-list');
+
+function buildRow(s, isChild){
+  const wrap=document.createElement('div');
+
+  const row=document.createElement('div');
+  row.id='row-'+s.id;
+  row.className=isChild?'child-row':'session-row';
+
+  const left=document.createElement('div');
+  left.style.cssText='display:flex;align-items:center;gap:8px';
+
+  const dot=document.createElement('div');
+  dot.id='dot-'+s.id;
+  dot.className='dot'+(s.id==='silver_bullet'?' sb-idle':'');
+  left.appendChild(dot);
+
+  const nameEl=document.createElement('div');
+  nameEl.style.cssText='display:flex;align-items:center;gap:6px';
+  const nm=document.createElement('span');
+  nm.id='name-'+s.id;
+  nm.className=isChild?'child-name':'row-name';
+  nm.style.cssText=`font-size:${isChild?'12':'13'}px;font-weight:500;color:var(--color-text-primary)`;
+  nm.textContent=s.name;
+  nameEl.appendChild(nm);
+  if(s.note){
+    const badge=document.createElement('span');
+    badge.style.cssText='font-size:10px;padding:2px 6px;border-radius:99px;background:#fef3c7;color:#92400e;font-weight:500';
+    badge.textContent=s.note;
+    nameEl.appendChild(badge);
   }
-  return { active, next };
+  left.appendChild(nameEl);
+  row.appendChild(left);
+
+  const rng=document.createElement('span');
+  rng.id='range-'+s.id;
+  rng.className=isChild?'child-range dim':'row-range dim';
+  rng.style.cssText=`font-size:11px;font-variant-numeric:tabular-nums`;
+  rng.textContent=`${fmt12(s.start)} – ${fmt12(s.end)}`;
+  row.appendChild(rng);
+
+  wrap.appendChild(row);
+
+  if(s.children&&s.children.length){
+    const childWrap=document.createElement('div');
+    childWrap.id='children-'+s.id;
+    childWrap.style.cssText='margin-top:5px;margin-left:18px;display:flex;flex-direction:column;gap:4px';
+    s.children.forEach(c=>childWrap.appendChild(buildRow(c,true)));
+    wrap.appendChild(childWrap);
+  }
+
+  return wrap;
 }
 
-// Build list
-const list = document.getElementById('sessions-list');
-SESSIONS.forEach(s => {
-  const el = document.createElement('div');
-  el.id = 'row-' + s.id;
-  el.className = 'session-row rounded-xl px-4 py-3 flex items-center justify-between';
-  el.innerHTML = `
-    <div class="flex items-center gap-3">
-      <div class="w-2 h-2 rounded-full dot-idle transition-all duration-300" id="dot-${s.id}"></div>
-      <span class="text-sm font-semibold row-name transition-colors duration-300" id="name-${s.id}" style="color:var(--text)">${s.name}</span>
-    </div>
-    <span class="text-xs tabular-nums dim" id="range-${s.id}">${fmt12(s.start)} – ${fmt12(s.end)}</span>
-  `;
-  list.appendChild(el);
-});
+SESSIONS.forEach(s=>list.appendChild(buildRow(s,false)));
 
-function update() {
-  const now = new Date();
-  document.getElementById('ny-time').textContent = fmtClock(now, 'America/New_York');
-  document.getElementById('ny-date').textContent = fmtDate(now, 'America/New_York');
-  document.getElementById('khi-time').textContent = fmtClock(now, 'Asia/Karachi');
+function getAllSessions(){
+  const all=[];
+  SESSIONS.forEach(s=>{all.push(s);if(s.children)s.children.forEach(c=>all.push(c))});
+  return all;
+}
 
-  const nyMins = getNYMinutes(now);
-  const { active, next } = getStatus(nyMins);
+function update(){
+  const now=new Date();
+  document.getElementById('ny-time').textContent=fmtClock(now,'America/New_York');
+  document.getElementById('ny-date').textContent=fmtDate(now,'America/New_York');
+  document.getElementById('khi-time').textContent=fmtClock(now,'Asia/Karachi');
+  const nyM=getNYMins(now);
 
-  // Reset rows
-  SESSIONS.forEach(s => {
-    document.getElementById('row-' + s.id).className = 'session-row rounded-xl px-4 py-3 flex items-center justify-between';
-    document.getElementById('dot-' + s.id).className = 'w-2 h-2 rounded-full dot-idle transition-all duration-300';
-    document.getElementById('name-' + s.id).style.color = 'var(--text)';
-    document.getElementById('range-' + s.id).style.color = '';
+  const all=getAllSessions();
+
+  // reset all
+  all.forEach(s=>{
+    const row=document.getElementById('row-'+s.id);
+    const dot=document.getElementById('dot-'+s.id);
+    const nm=document.getElementById('name-'+s.id);
+    const rng=document.getElementById('range-'+s.id);
+    if(!row)return;
+    const isChild=s.id==='silver_bullet'||s.id==='cme_open';
+    row.className=isChild?'child-row':'session-row';
+    dot.className='dot'+(s.id==='silver_bullet'?' sb-idle':'');
+    dot.style.background='';dot.style.boxShadow='';
+    nm.style.color='var(--color-text-primary)';
+    rng.style.color='';
   });
 
-  // Current
-  if (active) {
-    const s = active.session;
-    document.getElementById('current-name').textContent = s.name;
-    document.getElementById('current-range').textContent = `${fmt12(s.start)} – ${fmt12(s.end)} NY`;
-    document.getElementById('current-pill').textContent = 'ACTIVE';
-    document.getElementById('current-pill').style.cssText = 'background:#f0fdf4;color:#16a34a';
+  // find active top-level and child
+  let activeTop=null, activeChild=null, next=null, minGap=Infinity;
 
-    const pct = Math.round((active.elapsed / active.total) * 100);
-    document.getElementById('progress-bar').style.width = pct + '%';
-    document.getElementById('prog-start').textContent = fmt12(s.start);
-    document.getElementById('prog-pct').textContent = `${pct}% · ${fmtCountdown(active.left)} left`;
-    document.getElementById('prog-end').textContent = fmt12(s.end);
+  SESSIONS.forEach(s=>{
+    const st=toMins(s.start),en=toMins(s.end);
+    if(nyM>=st&&nyM<en) activeTop={session:s,elapsed:nyM-st,total:en-st,left:en-nyM};
+    let gap=st-nyM;if(gap<=0)gap+=1440;
+    if(gap<minGap){minGap=gap;next={session:s,inMins:gap}}
+    if(s.children){
+      s.children.forEach(c=>{
+        const cst=toMins(c.start),cen=toMins(c.end);
+        if(nyM>=cst&&nyM<cen) activeChild={session:c,elapsed:nyM-cst,total:cen-cst,left:cen-nyM};
+        let cgap=cst-nyM;if(cgap<=0)cgap+=1440;
+        if(cgap<minGap){minGap=cgap;next={session:c,inMins:cgap}}
+      });
+    }
+  });
 
-    document.getElementById('row-' + s.id).className = 'session-row is-active rounded-xl px-4 py-3 flex items-center justify-between';
-    document.getElementById('dot-' + s.id).className = 'w-2 h-2 rounded-full dot-active transition-all duration-300';
-    document.getElementById('name-' + s.id).style.color = 'var(--active-fg)';
-    document.getElementById('range-' + s.id).style.color = 'var(--active-sub)';
+  const displayActive=activeChild||activeTop;
+  const isSB=activeChild&&activeChild.session.id==='silver_bullet';
+
+  if(displayActive){
+    const s=displayActive.session;
+    document.getElementById('current-name').textContent=s.name;
+    document.getElementById('current-range').textContent=`${fmt12(s.start)} – ${fmt12(s.end)} NY`;
+    document.getElementById('current-pill').textContent='ACTIVE';
+    document.getElementById('current-pill').className='pill '+(isSB?'pill-sb':'pill-active');
+    const pct=Math.round((displayActive.elapsed/displayActive.total)*100);
+    document.getElementById('progress-bar').style.width=pct+'%';
+    document.getElementById('prog-start').textContent=fmt12(s.start);
+    document.getElementById('prog-pct').textContent=`${pct}% · ${fmtCD(displayActive.left)} left`;
+    document.getElementById('prog-end').textContent=fmt12(s.end);
   } else {
-    document.getElementById('current-name').textContent = 'Between sessions';
-    document.getElementById('current-range').textContent = 'No session currently active';
-    document.getElementById('current-pill').textContent = 'CLOSED';
-    document.getElementById('current-pill').style.cssText = 'background:var(--closed-bg);color:var(--closed-fg)';
-    document.getElementById('progress-bar').style.width = '0%';
-    document.getElementById('prog-start').textContent = '—';
-    document.getElementById('prog-pct').textContent = 'Waiting';
-    document.getElementById('prog-end').textContent = '—';
+    document.getElementById('current-name').textContent='Between sessions';
+    document.getElementById('current-range').textContent='No session currently active';
+    document.getElementById('current-pill').textContent='CLOSED';
+    document.getElementById('current-pill').className='pill pill-closed';
+    document.getElementById('progress-bar').style.width='0%';
+    document.getElementById('prog-start').textContent='—';
+    document.getElementById('prog-pct').textContent='Waiting';
+    document.getElementById('prog-end').textContent='—';
   }
 
-  // Next
-  if (next) {
-    const s = next.session;
-    document.getElementById('next-name').textContent = s.name;
-    document.getElementById('next-range').textContent = `${fmt12(s.start)} – ${fmt12(s.end)} NY`;
-    document.getElementById('next-countdown').textContent = fmtCountdown(next.inMins);
-    if (!active || active.session.id !== s.id) {
-      document.getElementById('row-' + s.id).className = 'session-row is-next rounded-xl px-4 py-3 flex items-center justify-between';
-      document.getElementById('dot-' + s.id).className = 'w-2 h-2 rounded-full dot-next transition-all duration-300';
+  // highlight active top row
+  if(activeTop){
+    const s=activeTop.session;
+    const row=document.getElementById('row-'+s.id);
+    const dot=document.getElementById('dot-'+s.id);
+    row.className='session-row is-active';
+    dot.className='dot active';
+    document.getElementById('name-'+s.id).style.color='var(--color-background-primary)';
+    document.getElementById('range-'+s.id).style.color='rgba(255,255,255,.4)';
+  }
+
+  // highlight active child row
+  if(activeChild){
+    const c=activeChild.session;
+    const crow=document.getElementById('row-'+c.id);
+    const cdot=document.getElementById('dot-'+c.id);
+    crow.className='child-row is-active';
+    cdot.className='dot sb-active';
+    document.getElementById('name-'+c.id).style.color='#92400e';
+    document.getElementById('range-'+c.id).style.color='#b45309';
+  }
+
+  // next session
+  if(next){
+    const s=next.session;
+    document.getElementById('next-name').textContent=s.name;
+    document.getElementById('next-range').textContent=`${fmt12(s.start)} – ${fmt12(s.end)} NY`;
+    document.getElementById('next-countdown').textContent=fmtCD(next.inMins);
+    const isChild=s.id==='silver_bullet'||s.id==='cme_open';
+    if(!displayActive||displayActive.session.id!==s.id){
+      const row=document.getElementById('row-'+s.id);
+      const dot=document.getElementById('dot-'+s.id);
+      if(row&&!isChild){row.className='session-row is-next'}
+      if(dot&&!isChild){dot.className='dot next'}
     }
   }
 }
 
-update();
-setInterval(update, 1000);
-
-// ── Service Worker ────────────────────────────────────────────────────
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js').then(reg => {
-      console.log('SW registered', reg.scope);
-    }).catch(err => console.log('SW failed', err));
-  });
-}
+update();setInterval(update,1000);
 </script>
-</body>
-</html>
